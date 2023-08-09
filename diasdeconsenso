@@ -1,0 +1,28 @@
+//@version=5
+indicator(title="Dias de Consenso de Alta/Baixa", shorttitle="DCA/B", overlay=true)
+
+// Parâmetros ajustáveis
+lookback_period = input.int(40, title="Períodos")
+volume_threshold = input.float(1.0, title="Fator de dp do volume")// Fator para multiplicar a média do volume
+variation_threshold = input.float(1.0, title="Fator de dp da variação") // Fator para multiplicar a média da variação
+
+// Cálculo da média móvel do volume
+avg_volume = ta.sma(volume, lookback_period)
+std_volume = ta.stdev(volume, lookback_period)
+
+// Cálculo da média móvel da variação
+avg_variation = ta.sma(math.abs(close - close[1]), lookback_period)
+std_variation = ta.stdev(math.abs(close - close[1]), lookback_period)
+
+// Condição para Dia de Consenso de Alta (DCA)
+dca_condition = close > close[1] and volume > avg_volume + volume_threshold * std_volume and math.abs(close - close[1]) > avg_variation + variation_threshold * std_variation
+
+// Condição para Dia de Consenso de Baixa (DCB)
+dcb_condition = close < close[1] and volume > avg_volume + volume_threshold * std_volume and math.abs(close - close[1]) > avg_variation + variation_threshold * std_variation
+
+ddd_condition = volume > avg_volume + volume_threshold * std_volume and math.abs(close - close[1]) <= avg_variation + variation_threshold * std_variation
+
+// Plotagem 
+plotshape(series=ddd_condition, title="DDD", location=location.abovebar, color=color.yellow, style=shape.triangledown, size=size.tiny)
+plotshape(series=dca_condition, title="DCA", location=location.belowbar, color=color.green, style=shape.triangleup, size=size.tiny)
+plotshape(series=dcb_condition, title="DCB", location=location.abovebar, color=color.red, style=shape.triangledown, size=size.tiny)
